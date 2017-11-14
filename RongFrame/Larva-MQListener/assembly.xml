@@ -1,0 +1,26 @@
+<assembly>
+    <id>0.1.20150911.0</id>
+    <formats>
+        <!-- zip,tar,tar.gz,tar.bz2,jar,dir,war -->
+        <format>tar</format>
+    </formats>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+    <!-- 需要打包的文件集 -->
+    <fileSets>
+        <fileSet>
+            <directory>src/main/scripts</directory>
+            <outputDirectory>../</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory>../</outputDirectory>
+            <includes>
+                <include>MQListener.jar</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

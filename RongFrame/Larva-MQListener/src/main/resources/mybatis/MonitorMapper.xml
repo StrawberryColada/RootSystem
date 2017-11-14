@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.larva.mq.mapper.MonitorMapper" >
+  <resultMap id="BaseInstanceMap" type="com.larva.mq.model.K_Instances" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="hostname" property="hostname" jdbcType="VARCHAR" />
+    <result column="cpuCounts" property="cpuCounts" jdbcType="VARCHAR" />
+    <result column="cpuCores" property="cpuCores" jdbcType="VARCHAR" />
+    <result column="memTotal" property="memTotal" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="BaseVersionMap" type="com.larva.mq.model.K_Versions" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="instance_id" property="instance_id" jdbcType="VARCHAR" />
+    <result column="version_type" property="version_type" jdbcType="VARCHAR" />
+    <result column="version_name" property="version_name" jdbcType="VARCHAR" />
+    <result column="version" property="version" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Instance_List" >
+    ID, HOSTNAME, CPUCORES, CPUCOUNTS ,MEMTOTAL
+  </sql>
+  <sql id="Base_Version_List" >
+    ID, INSTANCE_ID, VERSION_TYPE, VERSION_NAME ,VERSION
+  </sql>
+  <update id="create_k_instances" >
+	  <![CDATA[
+		  CREATE TABLE K_INSTANCES (
+		  ID VARCHAR(50) PRIMARY KEY,
+		  HOSTNAME VARCHAR(100) DEFAULT NULL,
+		  CPUCORES VARCHAR(10) DEFAULT NULL,
+		  CPUCOUNTS VARCHAR(10) DEFAULT NULL,
+		  MEMTOTAL VARCHAR(10) DEFAULT NULL);
+	  ]]>
+  </update>
+  
+  <update id="create_k_versions" >
+	  <![CDATA[
+		   CREATE TABLE K_VERSIONS(
+		   ID VARCHAR(50) PRIMARY KEY, 
+		   INSTANCE_ID VARCHAR(50),
+		   VERSION_TYPE VARCHAR(50),
+		   VERSION_NAME VARCHAR(50),
+		   VERSION BIGINT);
+	  ]]>
+  </update>
+  
+  <update id="updateInstance" parameterType="com.larva.mq.model.K_Instances" >
+    update K_INSTANCES
+    set cpuCores = #{cpuCores,jdbcType=VARCHAR},
+    cpuCounts = #{cpuCounts,jdbcType=VARCHAR},
+    memTotal = #{memTotal,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  <update id="updateVersion" parameterType="com.larva.mq.model.K_Versions" >
+    update K_VERSIONS
+    set version = #{version,jdbcType=BIGINT}
+    where instance_id = #{instance_id,jdbcType=VARCHAR}
+    and version_type = #{version_type,jdbcType=VARCHAR}
+  </update>
+  
+  <select id="get_k_table" resultType="java.lang.Integer">
+	  select count(*) from (select * from information_schema.tables where TABLE_CATALOG=#{database,jdbcType=VARCHAR} and table_name =#{tablename,jdbcType=VARCHAR}) t
+  </select>
+  
+  <select id="selectInstanceByHostname" resultMap="BaseInstanceMap">
+	  select  <include refid="Base_Instance_List" /> from  K_INSTANCES t where HOSTNAME=#{hostname,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="selectVersionsByInstanceId" resultMap="BaseVersionMap">
+	  select  <include refid="Base_Version_List" /> from  K_VERSIONS t where INSTANCE_ID=#{instance_id,jdbcType=VARCHAR}
+  </select>
+  
+  <insert id="insertInstance" parameterType="com.larva.mq.model.K_Instances" >
+    insert into K_INSTANCES (ID, HOSTNAME, CPUCORES, CPUCOUNTS, MEMTOTAL)
+    values (#{id,jdbcType=VARCHAR}, #{hostname,jdbcType=VARCHAR}, #{cpuCores,jdbcType=VARCHAR}, #{cpuCounts,jdbcType=VARCHAR}, #{memTotal,jdbcType=VARCHAR})
+  </insert>
+  
+  <insert id="insertVersion" parameterType="com.larva.mq.model.K_Versions" >
+    insert into K_VERSIONS (ID, INSTANCE_ID, VERSION_TYPE, VERSION_NAME, VERSION)
+    values (#{id,jdbcType=VARCHAR}, #{instance_id,jdbcType=VARCHAR}, #{version_type,jdbcType=VARCHAR}, #{version_name,jdbcType=VARCHAR}, #{version,jdbcType=BIGINT})
+  </insert>
+</mapper>

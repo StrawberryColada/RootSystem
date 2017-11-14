@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/rabbit
+       http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd">
+    
+   <!-- 连接服务配置  -->
+   <rabbit:connection-factory id="connectionFactory" host="localhost" username="guest"
+        password="guest" port="5672"  />
+         
+   <rabbit:admin connection-factory="connectionFactory"/>
+    
+   <!-- queue 队列声明-->
+   <rabbit:queue id="larva_mq_queue" durable="false" auto-delete="false" exclusive="false" name="${larva.mq.queue.heartbeat}"/>
+    
+   <!-- exchange queue binging key 绑定 -->
+    <rabbit:direct-exchange name="larva_mq_exchange" durable="false" auto-delete="false" id="larva.mq.exchange">
+        <rabbit:bindings>
+            <rabbit:binding queue="larva_mq_queue" key="${larva.mq.queue.heartbeat}_key"/>
+        </rabbit:bindings>
+    </rabbit:direct-exchange>
+     
+    <!-- spring template声明-->
+    <rabbit:template exchange="larva_mq_exchange" id="amqpTemplate"  connection-factory="connectionFactory"/>
+
+    <bean id="heartBeatSender" class="com.larva.mq.listener.HeartBeatSender" />
+    <bean id="heartBeatJob" class="com.larva.mq.job.HeartBeatJob" />
+
+    <!-- 配置connectionFactory -->
+    <!-- <bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
+          destroy-method="stop">
+        <property name="connectionFactory">
+            <bean class="org.apache.activemq.ActiveMQConnectionFactory">
+                <property name="brokerURL">
+                    <value>tcp://127.0.0.1:61616</value>
+                </property>
+                <property name="password" value="admin"/>
+                <property name="userName" value="admin"/>
+            </bean>
+        </property>
+        <property name="maxConnections" value="100"></property>
+    </bean> -->
+
+
+    <!-- 发送消息的目的地（一个队列） -->
+    <!-- <bean id="logsDestination" class="org.apache.activemq.command.ActiveMQQueue">
+        设置消息队列的名字
+        <constructor-arg index="0" value="logs" />
+    </bean>
+    <bean id="jmsMessageListener" class="com.larva.mq.listener.MQListener"/>
+    <bean id = "consumer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsFactory"/>
+        <property name="destination" ref="logsDestination" />
+        <property name="messageListener" ref="jmsMessageListener" />
+    </bean> -->
+</beans>
